@@ -1,0 +1,6 @@
+create_mongo_docker.sh
+secrets.json
+*.log
+.idea
+__pycache__
+

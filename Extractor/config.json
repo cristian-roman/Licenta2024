@@ -1,0 +1,12 @@
+{
+  "dataset_path": "/home/cristian/Documents/Facultate/Dataset",
+  "tar_files_directory": "TarFiles",
+  "tar_files": [
+    "Task02_Heart.tar",
+    "Task05_Prostate.tar"
+  ],
+  "images_directories": [
+    "Endometriosis"
+  ],
+  "statistics_file_name": "statistics.json"
+}
