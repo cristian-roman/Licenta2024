@@ -1,0 +1,1 @@
+export { BarStatisticsContext, BarStatisticsProvider } from './BarStatisticsProvider';

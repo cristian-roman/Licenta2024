@@ -1,0 +1,10 @@
+{
+  "checkpoint_directory": "/home/cristian/Documents/Facultate/checkpoints/graphnet-unet-checkpoint",
+  "dataset_split": {
+    "testing_percent": 0.85
+  },
+  "train_settings": {
+    "epochs": 0,
+    "starting_learning_rate": 0.000033
+  }
+}

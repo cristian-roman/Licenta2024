@@ -1,0 +1,1 @@
+export { default as useMobileContext } from './useMobileContext';
