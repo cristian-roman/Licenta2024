@@ -5,16 +5,11 @@ from ModelState.trainer_model_state import TrainerModelState
 from utils.injector import Injector
 
 
-def __set_model_state_for_training(model_state: TrainerModelState):
-    model_state.model.train()
-    model_state.optimizer.zero_grad()
-
-
 def run_training_phase(model_state: TrainerModelState, data_provider: DataProvider):
     logger = Injector.get_instance("logger")
 
     logger.log_info(f"Starting training....")
-    __set_model_state_for_training(model_state)
+    model_state.model.train()
 
     for (img_np, mask_np, index) in data_provider.training_data_iterator():
         print(f"Learning from input {index} / {data_provider.count_training_indices}")

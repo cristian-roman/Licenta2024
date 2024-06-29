@@ -21,13 +21,14 @@ class TrainerModelState(ModelState):
 
         train_config = Injector.get_instance("config")["train_settings"]
         self.optimizer = torch.optim.Adam(self.model.parameters(), train_config["starting_learning_rate"])
-        class_weights = torch.tensor(7.21).to(self.device)
+        class_weights = torch.tensor(0.75).to(self.device)
         self.criterion = torch.nn.BCEWithLogitsLoss(pos_weight=class_weights)
         self.best_loss = float("inf")
         self.__should_rename = True
 
         if with_load:
             self.load_checkpoint()
+            # self._load_model_from_checkpoint()
         else:
             config = Injector.get_instance("config")
             os_interactor.create_folder(config["checkpoint_directory"])
@@ -55,7 +56,7 @@ class TrainerModelState(ModelState):
 
     def __step(self, img_np, mask_np):
         mask_tensor = torch.tensor(mask_np).float().to(self.device)
-        mask_tensor = torch.where(mask_tensor >= 0.5457, torch.tensor(1.0).to(self.device), torch.tensor(0.0).to(self.device))
+        mask_tensor = torch.where(mask_tensor >= 0.58, torch.tensor(1.0).to(self.device), torch.tensor(0.0).to(self.device))
         output = self.forward(img_np)
 
         del img_np, mask_np

@@ -44,11 +44,6 @@ def __parse_images_stats(img_stats):
 def get_images_unique_sizes(_type, modified):
     img_stats = images_stats_repository.get_entry(_type, modified)
 
-    for (key, value) in img_stats['unique_sizes'].items():
-        img_stats['unique_sizes'][key] += 1
-        # wrong filled in db
-        # should be removed in the future
-
     return img_stats['unique_sizes']
 
 

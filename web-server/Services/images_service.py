@@ -38,7 +38,7 @@ def get_image(provenience_filter, health_state_filter, index, _type):
             np_image = images_master.get_np_from_image_bytes(image_bytes)
             threshold = 0.58
             np_image = np.where(np_image >= threshold, 255, 0)
-            image_bytes = images_master.get_img_bytes_from_np(np_image)
+            image_bytes = images_master.get_img_from_np(np_image)
 
     return image_bytes
 

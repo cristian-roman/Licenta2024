@@ -11,13 +11,21 @@ class DataLoader:
         if with_load:
             self.__load_indices()
         else:
-            dataset_split = Injector.get_instance('config')['dataset_split']
-            max_available_testing_data = self.__get_minimum_documents()
-
-            self.__set_indices(max_available_testing_data, dataset_split['testing_percent'])
+            # dataset_split = Injector.get_instance('config')['dataset_split']
+            self.training_split = list()
+            self.testing_split = list()
             self.validation_split = self.__get_validation_indices()
 
-            self.__save_indices_to_db()
+            # max_available_testing_data = self.__get_minimum_documents()
+            # self.__set_indices(max_available_testing_data, dataset_split['testing_percent'])
+
+            for i in range(42):
+                self.training_split.append(self.validation_split.pop())
+
+            for i in range(17):
+                self.testing_split.append(self.validation_split.pop())
+
+            # self.__save_indices_to_db()
 
         self.count_testing_indices = len(self.testing_split)
         self.count_training_indices = len(self.training_split)
@@ -30,6 +38,15 @@ class DataLoader:
             self.training_split = indices['training_split']
             self.testing_split = indices['testing_split']
             self.validation_split = indices['validation_split']
+
+    @staticmethod
+    def __get_validation_indices():
+        with DbConnection() as (db, _):
+            query = {"provenience": "endometriosis"}
+            results = db.image_mask_pairs.find(query, {"_id": 1})
+            ids = [result['_id'] for result in results]
+            random.shuffle(ids)
+            return ids
 
     @staticmethod
     def __get_minimum_documents():
@@ -47,39 +64,24 @@ class DataLoader:
         healthy_prostate_indices = self.__get_indices_for_entry('prostate', False)
         diseased_prostate_indices = self.__get_indices_for_entry('prostate', True)
 
-        random.shuffle(healthy_heart_indices)
-        random.shuffle(diseased_heart_indices)
-        random.shuffle(healthy_prostate_indices)
-        random.shuffle(diseased_prostate_indices)
-
         testing_data_amount = int(max_available_testing_data * training_data_percent)
 
-        testing_split = set()
         for i in range(testing_data_amount):
-            testing_split.add(healthy_heart_indices[i])
-            testing_split.add(diseased_heart_indices[i])
-            testing_split.add(healthy_prostate_indices[i])
-            testing_split.add(diseased_prostate_indices[i])
+            self.testing_split.append(healthy_heart_indices[i])
+            self.testing_split.append(diseased_heart_indices[i])
+            self.testing_split.append(healthy_prostate_indices[i])
+            self.testing_split.append(diseased_prostate_indices[i])
 
-        training_split = set()
-        self.__add_indices_to_training_split(healthy_heart_indices,
-                                             training_split,
-                                             testing_data_amount)
+        for i in range(15):
+            self.training_split.append(self.validation_split.pop())
 
-        self.__add_indices_to_training_split(diseased_heart_indices,
-                                             training_split,
-                                             testing_data_amount)
+        self.__add_indices_to_training_split(healthy_heart_indices, testing_data_amount)
 
-        self.__add_indices_to_training_split(healthy_prostate_indices,
-                                             training_split,
-                                             testing_data_amount)
+        self.__add_indices_to_training_split(diseased_heart_indices, testing_data_amount)
 
-        self.__add_indices_to_training_split(diseased_prostate_indices,
-                                             training_split,
-                                             testing_data_amount)
+        self.__add_indices_to_training_split(healthy_prostate_indices, testing_data_amount)
 
-        self.training_split = training_split
-        self.testing_split = testing_split
+        self.__add_indices_to_training_split(diseased_prostate_indices, testing_data_amount)
 
     @staticmethod
     def __get_indices_for_entry(provenience, diseased: bool):
@@ -90,25 +92,12 @@ class DataLoader:
             }
             results = db.image_mask_pairs.find(query)
             ids = [result['_id'] for result in results]
+            random.shuffle(ids)
             return ids
 
-    @staticmethod
-    def __add_indices_to_training_split(entry_list, training_split, starting_point):
+    def __add_indices_to_training_split(self, entry_list, starting_point):
         for i in range(starting_point, len(entry_list)):
-            training_split.add(entry_list[i])
-
-    @staticmethod
-    def __get_validation_indices():
-        with DbConnection() as (db, _):
-            query = {"provenience": "endometriosis"}
-            results = db.image_mask_pairs.find(query, {"_id": 1})
-            ids = [result['_id'] for result in results]
-
-            validation_split = set()
-            for _id in ids:
-                validation_split.add(_id)
-
-            return validation_split
+            self.training_split.append(entry_list[i])
 
     def __save_indices_to_db(self):
         last_id = self.__get_last_indices_id('saving')

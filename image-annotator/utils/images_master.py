@@ -19,13 +19,16 @@ def resize_np(np_img, size):
 
 
 def get_img_from_np(np_array):
-    fig, ax = plt.subplots()
-    ax.imshow(np_array, cmap='gray')
-    ax.axis('off')
-    buf = BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0)
-    plt.close(fig)
-    buf.seek(0)
+    # Ensure the array is in the correct format (uint8)
+    if np_array.dtype != np.uint8:
+        np_array = (255 * (np_array - np_array.min()) / (np_array.max() - np_array.min())).astype(np.uint8)
+
+    # Convert the NumPy array to an image using OpenCV
+    is_success, buffer = cv2.imencode('.png', np_array)
+
+    # Convert buffer to BytesIO object
+    buf = BytesIO(buffer)
+
     return buf
 
 

@@ -2,7 +2,7 @@ from Data.TarManager.refs_to_np.image_mask_np_generator import image_mask_np_ite
 
 
 def image_mask_slices_iterator():
-    for np_image_pair in image_mask_np_iterator(2):
+    for np_image_pair in image_mask_np_iterator(10):
         img_np, mask_np, provenience = np_image_pair
         img_slices = img_np.shape[2]
         for slice_number in range(img_slices):

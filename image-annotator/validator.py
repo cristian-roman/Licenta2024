@@ -12,10 +12,10 @@ __fn_total = 0
 
 
 def run_validation_phase(model_state: TrainerModelState, data_provider: DataProvider):
-    global __tp_total
-    global __tn_total
-    global __fp_total
-    global __fn_total
+    global __tp_total, \
+        __tn_total, \
+        __fp_total, \
+        __fn_total
 
     logger = Injector.get_instance("logger")
     logger.log_info("Validation phase started")
@@ -47,7 +47,7 @@ def run_validation_phase(model_state: TrainerModelState, data_provider: DataProv
 
 
 def __compute_entry_metrics(annotated_mask_np, mask_np):
-    mask_np = (mask_np > 0.5457).astype(int)
+    mask_np = (mask_np >= 0.58).astype(int)
     tp = np.sum(np.logical_and(mask_np == 1, annotated_mask_np == 1))
     tn = np.sum(np.logical_and(mask_np == 0, annotated_mask_np == 0))
     fp = np.sum(np.logical_and(mask_np == 0, annotated_mask_np == 1))
@@ -57,10 +57,10 @@ def __compute_entry_metrics(annotated_mask_np, mask_np):
 
 
 def __add_to_global_metrics(tp, tn, fp, fn):
-    global __tp_total
-    global __tn_total
-    global __fp_total
-    global __fn_total
+    global __tp_total, \
+        __tn_total, \
+        __fp_total, \
+        __fn_total
 
     __tp_total += tp
     __tn_total += tn
@@ -69,10 +69,10 @@ def __add_to_global_metrics(tp, tn, fp, fn):
 
 
 def __save_metrics_to_db(accuracy, recall, precision, f1_score):
-    global __tp_total
-    global __tn_total
-    global __fp_total
-    global __fn_total
+    global __tp_total, \
+        __tn_total, \
+        __fp_total, \
+        __fn_total
 
     with DbConnection() as (db, _):
         metrics = {
@@ -86,4 +86,16 @@ def __save_metrics_to_db(accuracy, recall, precision, f1_score):
             "f1_score": float(f1_score)
         }
 
-        db.model_stats.insert_one(metrics)
+        model_stats_id = get_model_stats_id()
+        if model_stats_id:
+            db.model_stats.update_one({"_id": model_stats_id}, {"$set": metrics})
+        else:
+            db.model_stats.insert_one(metrics)
+
+
+def get_model_stats_id():
+    with DbConnection() as (db, _):
+        try:
+            return db.model_stats.find_one(sort=[("date", -1)])['_id']
+        except Exception:
+            return None

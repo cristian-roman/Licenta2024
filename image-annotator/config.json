@@ -5,6 +5,6 @@
   },
   "train_settings": {
     "epochs": 0,
-    "starting_learning_rate": 0.000033
+    "starting_learning_rate": 0.0000033
   }
 }

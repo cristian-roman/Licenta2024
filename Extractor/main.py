@@ -1,4 +1,5 @@
 import os
+from threading import Thread, Lock
 
 import db_images
 from Data.aggregator import image_mask_aggregator
@@ -24,12 +25,17 @@ def main():
     register_dependencies()
     os.system("sh create_mongo_docker.sh")
 
+    logger = Injector.get_instance("logger")
+    workers = 10
+    threads = []
     organs_stats_classes = dict()
+    pairs = 0
+    locker = Lock()
     for image, mask, provenience in image_mask_aggregator():
         if provenience not in organs_stats_classes:
             organs_stats_classes[provenience] = OrganStats(provenience)
-
         organ_stats = organs_stats_classes[provenience]
+
         organ_stats.update_statistics(mask)
 
         unmodified_images_stats.update_statistics(image)
@@ -40,7 +46,20 @@ def main():
         modified_images_stats.update_statistics(image)
         modified_masks_stats.update_statistics(mask)
 
-        db_images.save_np_pair_to_db(image, mask, provenience)
+        thr = Thread(target=db_images.save_np_pair_to_db, args=(image, mask, provenience, locker))
+        thr.start()
+        threads.append(thr)
+
+        pairs += 1
+        logger.log_info("Image saved and statistics updated..............pair: " + str(pairs))
+        while len(threads) >= workers:
+            for thr in threads:
+                if not thr.is_alive():
+                    threads.remove(thr)
+                    thr.join()
+
+    for thread in threads:
+        thread.join()
 
     log_saved_pairs_counter()
 

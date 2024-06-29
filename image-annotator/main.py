@@ -17,7 +17,7 @@ def main():
     epochs = Injector.get_instance('config')['train_settings']['epochs']
 
     model_state = TrainerModelState(with_load)
-    data_provider = DataProvider(with_load)
+    data_provider = DataProvider(False)
 
     for epoch in range(epochs):
         logger.log_info(f'Epoch {epoch + 1} started')
@@ -35,6 +35,8 @@ def main():
         logger.log_info(f'Epoch {epoch + 1} finished')
 
     logger.log_info("Training finished")
+
+    model_state.load_checkpoint()
 
     validator.run_validation_phase(model_state, data_provider)
 

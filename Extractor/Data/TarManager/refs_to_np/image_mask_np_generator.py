@@ -25,10 +25,24 @@ def __extract_np_pairs(np_image_mask_queue: Queue):
     logger = Injector.get_instance("logger")
     logger.log_info("[refs_to_np] [image_mask_np_generator] Extracting np arrays from nib references started.")
 
+    workers = 5
+    threads = []
     for nib_package in image_mask_ref_iterator(2):
         if nib_package is None:
             break
-        __fetch_np_from_refs(nib_package, np_image_mask_queue)
+        # __fetch_np_from_refs(nib_package, np_image_mask_queue)
+        thr = Thread(target=__fetch_np_from_refs, args=(nib_package, np_image_mask_queue))
+        thr.start()
+        threads.append(thr)
+
+        while len(threads) >= workers:
+            for thr in threads:
+                if not thr.is_alive():
+                    threads.remove(thr)
+                    thr.join()
+
+    for thr in threads:
+        thr.join()
 
     np_image_mask_queue.put(None)
     logger.log_info("[refs_to_np] [image_mask_np_generator] Extracting np arrays from nib references finished.")

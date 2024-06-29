@@ -36,7 +36,7 @@ def get_image(index):
         provenience_filter = _filter.get('provenience')
         health_state = _filter.get('health_state')
         image_bytes = images_service.get_image(provenience_filter, health_state, index, _type)
-        return Response(image_bytes, mimetype='image/jpg'), 200
+        return Response(image_bytes, mimetype='image/png'), 200
     except Exception:
         return "Server was unable to provide the image", 500
 

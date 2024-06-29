@@ -1,5 +1,4 @@
 import { Box, Text, Flex, Heading } from '@chakra-ui/react';
-import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 
 import { useBarStatisticsContext } from '../hooks';
