@@ -51,11 +51,6 @@ Licenta2024-main/
 - MongoDB with GridFS
 - Optional: NVIDIA GPU for training
 
-Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
 ---
 
 ## 🚀 Running the Project
